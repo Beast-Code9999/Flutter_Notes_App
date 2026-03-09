@@ -22,22 +22,30 @@ class _MainScreenState extends State<MainScreen> {
     final List<Note> notes = box.values.toList();
 
     return Scaffold(
-      body: ListView.builder(
-        itemCount: notes.length,
-        itemBuilder: (context, index) {
-          return NoteItem(
-            note: notes[index], 
-            onTap: () {
-              
-            }, 
-            onDismissed: () {
+      // Rebuilds automatically when the Hive box changes
+      body: ValueListenableBuilder(
+        valueListenable: box.listenable(), // listen to box changes
+        builder: (context, Box<Note> box, _) {
+          final notes = box.values.toList(); // get current notes from box
 
-            }, 
-            onLongPress: () {
-              
-            }
+          return ListView.builder(
+            itemCount: notes.length,
+            itemBuilder: (context, index) {
+              return NoteItem(
+                note: notes[index],
+                onTap: () {},
+                onDismissed: () {
+                  box.deleteAt(index); // remove from Hive, UI updates automatically
+                  ScaffoldMessenger.of(context).showSnackBar( // show message of removed item
+                    SnackBar(content: Text("${notes[index].title} deleted")),
+                  );
+                },
+                onLongPress: () {},
+              );
+            },
           );
-        }),
+        },
+      ),
 
       floatingActionButton: FloatingActionButton(
         onPressed: () {

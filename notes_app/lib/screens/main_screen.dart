@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:notes_app/models/note.dart';
+import 'package:notes_app/widgets/note_item.dart';
 import 'package:uuid/uuid.dart';
 
 class MainScreen extends StatefulWidget {
@@ -24,7 +25,18 @@ class _MainScreenState extends State<MainScreen> {
       body: ListView.builder(
         itemCount: notes.length,
         itemBuilder: (context, index) {
-          return Text(notes[index].title);
+          return NoteItem(
+            note: notes[index], 
+            onTap: () {
+              
+            }, 
+            onDismissed: () {
+
+            }, 
+            onLongPress: () {
+              
+            }
+          );
         }),
 
       floatingActionButton: FloatingActionButton(

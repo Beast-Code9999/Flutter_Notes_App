@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:notes_app/models/note.dart';
+import 'package:notes_app/screens/notes_detail_screen.dart';
 import 'package:notes_app/widgets/note_item.dart';
 import 'package:uuid/uuid.dart';
 
@@ -19,6 +20,10 @@ class _MainScreenState extends State<MainScreen> {
 
   // Show edit dialog and edit notes
   void _showEditDialog( int index, Note note) {
+    // prefil text 
+    _titleController.text = note.title;
+    _contentController.text = note.content;
+    
     showDialog(
       context: context, 
       builder: (context) {
@@ -85,7 +90,18 @@ class _MainScreenState extends State<MainScreen> {
                 note: notes[index],
 
                 // open note
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(
+                      builder: (context) => NotesDetailScreen(
+                        note: notes[index],
+                        index: index,
+                        onEdit: _showEditDialog,
+                      )
+                    )
+                  );
+                },
 
                 // delete note
                 onDismissed: () {
@@ -97,9 +113,6 @@ class _MainScreenState extends State<MainScreen> {
 
                 // edit note
                 onLongPress: () {
-                  // prefil text 
-                  _titleController.text = notes[index].title;
-                  _contentController.text = notes[index].content;
                   // call editing method
                   _showEditDialog(index, notes[index]);
                 },

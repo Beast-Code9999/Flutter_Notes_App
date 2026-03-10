@@ -17,10 +17,60 @@ class _MainScreenState extends State<MainScreen> {
   final TextEditingController _contentController = TextEditingController();
   final _uuid = Uuid();
 
+  // Show edit dialog and edit notes
+  void _showEditDialog( int index, Note note) {
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Edit Note"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min, // minimum content size
+              children: [ // Enter title and content
+                TextField( // add title
+                  controller: _titleController,
+                  decoration: InputDecoration(hintText: "Title"),
+                ),
+                TextField( // add title
+                  controller: _contentController,
+                  decoration: InputDecoration(hintText: "Content"),
+                )
+              ],
+            ),
+            actions: [
+              TextButton( // cancel alert dialog and clear controller
+                onPressed: () {
+                  _titleController.clear();
+                  _contentController.clear();
+                  Navigator.pop(context);
+                }, 
+                child: Text("Cancel")
+              ),
+              TextButton( // save note and pop alert dialog
+                onPressed: () { 
+                  // add note if textcontroller is not empty
+                  if(_contentController.text.isNotEmpty && _titleController.text.isNotEmpty) {
+                    box.putAt(index, Note(
+                      id: note.id, // keep the same ID
+                      title: _titleController.text,
+                      content: _contentController.text,
+                      createdAt: note.createdAt, // keep original date
+                    ));
+                    _titleController.clear();
+                    _contentController.clear();
+                    Navigator.pop(context);
+                  }
+                  // to be added
+                }, 
+                child: Text("Save")
+              )
+            ],
+        );
+      });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<Note> notes = box.values.toList();
-
     return Scaffold(
       // Rebuilds automatically when the Hive box changes
       body: ValueListenableBuilder(
@@ -33,20 +83,33 @@ class _MainScreenState extends State<MainScreen> {
             itemBuilder: (context, index) {
               return NoteItem(
                 note: notes[index],
+
+                // open note
                 onTap: () {},
+
+                // delete note
                 onDismissed: () {
                   box.deleteAt(index); // remove from Hive, UI updates automatically
                   ScaffoldMessenger.of(context).showSnackBar( // show message of removed item
                     SnackBar(content: Text("${notes[index].title} deleted")),
                   );
                 },
-                onLongPress: () {},
+
+                // edit note
+                onLongPress: () {
+                  // prefil text 
+                  _titleController.text = notes[index].title;
+                  _contentController.text = notes[index].content;
+                  // call editing method
+                  _showEditDialog(index, notes[index]);
+                },
               );
             },
           );
         },
       ),
 
+      // Add note button
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog( // Add notes
@@ -80,14 +143,12 @@ class _MainScreenState extends State<MainScreen> {
                     onPressed: () { 
                       // add note if textcontroller is not empty
                       if(_contentController.text.isNotEmpty && _titleController.text.isNotEmpty) {
-                        setState(() {
-                            box.add(Note( 
-                              id: _uuid.v4(), // use UUID to automatic generation of IDs
-                              title: _titleController.text,
-                              content: _contentController.text, 
-                              createdAt: DateTime.now()
-                          ));
-                        });
+                        box.add(Note( 
+                          id: _uuid.v4(), // use UUID to automatic generation of IDs
+                          title: _titleController.text,
+                          content: _contentController.text, 
+                          createdAt: DateTime.now()
+                        ));
                         _titleController.clear();
                         _contentController.clear();
                         Navigator.pop(context);
@@ -96,7 +157,6 @@ class _MainScreenState extends State<MainScreen> {
                     }, 
                     child: Text("Save")
                   )
-
                 ],
               );
             });

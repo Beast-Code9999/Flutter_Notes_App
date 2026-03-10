@@ -83,6 +83,10 @@ class _MainScreenState extends State<MainScreen> {
         builder: (context, Box<Note> box, _) {
           final notes = box.values.toList(); // get current notes from box
 
+          if(notes.isEmpty) {
+            return Center(child: Text("No notes yet"));
+          }
+
           return ListView.builder(
             itemCount: notes.length,
             itemBuilder: (context, index) {
